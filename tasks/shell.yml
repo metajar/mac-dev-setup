@@ -5,6 +5,10 @@
     dest: "{{ home_dir }}/.oh-my-zsh"
     depth: 1
     update: false
+  # Public repo: ignore any url.*.insteadOf rewrites in ~/.gitconfig
+  # (e.g. https -> git@github.com:) so cloning never needs an SSH key.
+  environment:
+    GIT_CONFIG_GLOBAL: /dev/null
 
 - name: Install Oh My Zsh plugins
   ansible.builtin.git:
@@ -12,6 +16,8 @@
     dest: "{{ home_dir }}/.oh-my-zsh/custom/plugins/{{ item.name }}"
     depth: 1
     update: false
+  environment:
+    GIT_CONFIG_GLOBAL: /dev/null
   loop: "{{ omz_custom_plugins }}"
   loop_control:
     label: "{{ item.name }}"

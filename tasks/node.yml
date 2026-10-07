@@ -5,6 +5,9 @@
     repo: https://github.com/nvm-sh/nvm.git
     dest: "{{ nvm_dir }}"
     update: false
+  # Public repo: ignore url.*.insteadOf rewrites in ~/.gitconfig (see shell.yml).
+  environment:
+    GIT_CONFIG_GLOBAL: /dev/null
   register: nvm_clone
 
 - name: Check out the latest nvm release
