@@ -15,7 +15,8 @@ git_user_email: ""
 generate_ssh_key: true
 
 # --- Homebrew ----------------------------------------------------------------
-homebrew_taps: []
+homebrew_taps:
+  - terraform-linters/tap   # tflint (removed from homebrew-core over its BUSL license)
 
 homebrew_formulae:
   # Core CLI
@@ -54,7 +55,7 @@ homebrew_formulae:
   - golangci-lint
   # Infrastructure as code
   - opentofu
-  - tflint
+  # tflint is a cask from terraform-linters/tap; see homebrew_casks below
   # Containers (free Docker runtime: start with `colima start`)
   - colima
   - docker
@@ -78,6 +79,7 @@ homebrew_casks:
   - bruno              # API client (open-source Postman alternative)
   - google-chrome
   - firefox
+  - terraform-linters/tap/tflint
 
 homebrew_extra_casks: []
 
