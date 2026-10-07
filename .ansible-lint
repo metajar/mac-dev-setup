@@ -1,0 +1,6 @@
+---
+skip_list:
+  - name[casing]               # "iTerm2" and "macOS" are spelled correctly
+  - latest[git]                # cloning default branch is intended
+  - command-instead-of-module  # nvm's documented checkout-latest-tag step
+  - no-handler

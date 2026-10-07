@@ -1,0 +1,9 @@
+---
+# Go itself comes from Homebrew; these are the editor/lint/debug tools.
+- name: Install Go tools
+  ansible.builtin.command: go install {{ item.pkg }}
+  args:
+    creates: "{{ gopath }}/bin/{{ item.bin }}"
+  loop: "{{ go_tools }}"
+  loop_control:
+    label: "{{ item.bin }}"

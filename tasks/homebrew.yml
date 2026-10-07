@@ -1,0 +1,23 @@
+---
+- name: Add Homebrew taps
+  community.general.homebrew_tap:
+    name: "{{ homebrew_taps }}"
+    state: present
+  when: homebrew_taps | length > 0
+
+- name: Update Homebrew and install command-line packages
+  community.general.homebrew:
+    name: "{{ homebrew_formulae + homebrew_extra_formulae }}"
+    state: present
+    update_homebrew: true
+
+- name: Install apps (casks)
+  community.general.homebrew_cask:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ homebrew_casks + homebrew_extra_casks }}"
+  register: cask_result
+  # An app you already installed by hand (e.g. Chrome) isn't an error.
+  failed_when:
+    - cask_result.failed
+    - "'already an App' not in (cask_result.msg | default(''))"

@@ -1,0 +1,45 @@
+# Managed by Ansible (mac-dev-setup) — edits here are overwritten.
+# Put personal tweaks in ~/.zshrc.local instead.
+
+# --- Homebrew ---------------------------------------------------------------
+eval "$({{ brew_prefix }}/bin/brew shellenv)"
+
+# --- Oh My Zsh --------------------------------------------------------------
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="{{ omz_theme }}"
+plugins=({{ omz_plugins | join(' ') }})
+source "$ZSH/oh-my-zsh.sh"
+
+export EDITOR="{{ shell_editor }}"
+export VISUAL="$EDITOR"
+
+# --- Python (pyenv for interpreters, uv for tools/projects) ----------------
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null && eval "$(pyenv init - zsh)"
+export PATH="$HOME/.local/bin:$PATH"
+
+# --- Node (nvm) -------------------------------------------------------------
+export NVM_DIR="{{ nvm_dir }}"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+
+# --- Go ---------------------------------------------------------------------
+export GOPATH="{{ gopath }}"
+export PATH="$GOPATH/bin:$PATH"
+
+{% for f in (homebrew_formulae + homebrew_extra_formulae) | select('match', '^postgresql@') %}
+# --- {{ f }} (keg-only, so add its tools to PATH) ---
+export PATH="{{ brew_prefix }}/opt/{{ f }}/bin:$PATH"
+{% endfor %}
+
+# --- Tools ------------------------------------------------------------------
+command -v direnv >/dev/null && eval "$(direnv hook zsh)"
+command -v fzf >/dev/null && source <(fzf --zsh)
+
+alias ls="eza"
+alias ll="eza -lah --git"
+alias lt="eza --tree --level=2"
+alias tf="tofu"
+
+# --- Local overrides ----------------------------------------------------------
+[ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"

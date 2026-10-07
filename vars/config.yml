@@ -1,0 +1,133 @@
+---
+# ============================================================================
+# Edit this file to customise your setup. Re-run ./bootstrap.sh any time;
+# everything is idempotent (already-installed things are skipped).
+# ============================================================================
+
+home_dir: "{{ lookup('env', 'HOME') }}"
+
+# --- Git identity (leave blank to skip) -------------------------------------
+git_user_name: ""
+git_user_email: ""
+
+# Generate ~/.ssh/id_ed25519 if it doesn't exist (no passphrase; add one later
+# with: ssh-keygen -p -f ~/.ssh/id_ed25519)
+generate_ssh_key: true
+
+# --- Homebrew ----------------------------------------------------------------
+homebrew_taps: []
+
+homebrew_formulae:
+  # Core CLI
+  - git
+  - gh
+  - curl
+  - wget
+  - jq
+  - yq
+  - ripgrep
+  - fd
+  - fzf
+  - bat
+  - eza
+  - tree
+  - htop
+  - watch
+  - tmux
+  - coreutils
+  - gnu-sed
+  - direnv
+  - shellcheck
+  - shfmt
+  - httpie
+  # Python (pyenv build deps + tools)
+  - openssl@3
+  - readline
+  - sqlite
+  - xz
+  - zlib
+  - tcl-tk
+  - pyenv
+  - uv
+  # Go
+  - go
+  - golangci-lint
+  # Infrastructure as code
+  - opentofu
+  - tflint
+  # Containers (free Docker runtime: start with `colima start`)
+  - colima
+  - docker
+  - docker-compose
+  - docker-buildx
+  # Databases & local web dev (installed, not started; use `brew services start ...`)
+  - postgresql@17
+  - redis
+  - mkcert
+  - nss
+
+# Anything extra you want, without touching the list above
+homebrew_extra_formulae: []
+
+homebrew_casks:
+  - iterm2
+  - visual-studio-code
+  - font-jetbrains-mono-nerd-font
+  - font-meslo-lg-nerd-font
+  - rectangle          # window snapping
+  - bruno              # API client (open-source Postman alternative)
+  - google-chrome
+  - firefox
+
+homebrew_extra_casks: []
+
+# --- Oh My Zsh ----------------------------------------------------------------
+omz_theme: robbyrussell
+omz_plugins:
+  - git
+  - golang
+  - docker
+  - docker-compose
+  - npm
+  - python
+  - zsh-autosuggestions
+  - zsh-syntax-highlighting   # must stay last
+omz_custom_plugins:
+  - name: zsh-autosuggestions
+    repo: https://github.com/zsh-users/zsh-autosuggestions.git
+  - name: zsh-syntax-highlighting
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+
+shell_editor: "code --wait"
+
+# --- Python -------------------------------------------------------------------
+# A major.minor prefix; the newest matching patch release is installed by pyenv.
+python_version: "3.14"
+uv_tools:
+  - ruff
+  - pre-commit
+  - ipython
+
+# --- Node / NVM ---------------------------------------------------------------
+nvm_dir: "{{ home_dir }}/.nvm"
+node_versions:
+  - "lts/*"
+node_default: "lts/*"
+npm_global_packages:
+  - pnpm
+  - typescript
+  - npm-check-updates
+
+# --- Go -----------------------------------------------------------------------
+gopath: "{{ home_dir }}/go"
+go_tools:
+  - { pkg: "golang.org/x/tools/gopls@latest",               bin: gopls }
+  - { pkg: "github.com/go-delve/delve/cmd/dlv@latest",       bin: dlv }
+  - { pkg: "golang.org/x/tools/cmd/goimports@latest",        bin: goimports }
+  - { pkg: "mvdan.cc/gofumpt@latest",                        bin: gofumpt }
+  - { pkg: "honnef.co/go/tools/cmd/staticcheck@latest",      bin: staticcheck }
+  - { pkg: "golang.org/x/vuln/cmd/govulncheck@latest",       bin: govulncheck }
+  - { pkg: "github.com/air-verse/air@latest",                bin: air }
+
+# --- macOS preferences ----------------------------------------------------------
+configure_macos: true

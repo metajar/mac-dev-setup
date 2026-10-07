@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Editors
+.vscode/*.log
+.idea/
+*.swp
+*~
+
+# Env / secrets
+.env
+.env.local
+.envrc.local
+
+# Tooling caches
+.direnv/
+__pycache__/
+*.pyc
+.terraform/

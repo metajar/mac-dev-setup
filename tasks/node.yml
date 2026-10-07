@@ -1,0 +1,57 @@
+---
+# nvm's own recommended manual install: clone, then check out the latest release tag.
+- name: Clone nvm
+  ansible.builtin.git:
+    repo: https://github.com/nvm-sh/nvm.git
+    dest: "{{ nvm_dir }}"
+    update: false
+  register: nvm_clone
+
+- name: Check out the latest nvm release
+  ansible.builtin.shell: >-
+    git checkout "$(git describe --abbrev=0 --tags --match 'v[0-9]*'
+    "$(git rev-list --tags --max-count=1)")"
+  args:
+    chdir: "{{ nvm_dir }}"
+  when: nvm_clone.changed
+  changed_when: true
+
+- name: Install Node versions
+  ansible.builtin.shell: |
+    export NVM_DIR="{{ nvm_dir }}"
+    . "$NVM_DIR/nvm.sh"
+    if [ "$(nvm version '{{ item }}')" != "N/A" ]; then
+      echo "already installed"
+    else
+      nvm install '{{ item }}'
+    fi
+  args:
+    executable: /bin/bash
+  loop: "{{ node_versions }}"
+  register: node_install
+  changed_when: "'already installed' not in node_install.stdout"
+
+- name: Set the default Node version
+  ansible.builtin.shell: |
+    export NVM_DIR="{{ nvm_dir }}"
+    . "$NVM_DIR/nvm.sh"
+    nvm alias default '{{ node_default }}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+
+- name: Install global npm packages
+  ansible.builtin.shell: |
+    export NVM_DIR="{{ nvm_dir }}"
+    . "$NVM_DIR/nvm.sh"
+    nvm use default >/dev/null
+    if npm ls -g --depth=0 '{{ item }}' >/dev/null 2>&1; then
+      echo "already installed"
+    else
+      npm install -g '{{ item }}'
+    fi
+  args:
+    executable: /bin/bash
+  loop: "{{ npm_global_packages }}"
+  register: npm_install
+  changed_when: "'already installed' not in npm_install.stdout"

@@ -1,0 +1,84 @@
+---
+# macOS web + Go development setup.
+# Run via ./bootstrap.sh, or directly: ansible-playbook main.yml [--tags node,go]
+# Tags: homebrew, shell, iterm, python, node, go, git, macos
+
+- name: Set up macOS for web and Go development
+  hosts: localhost
+  gather_facts: true
+
+  vars_files:
+    - vars/config.yml
+
+  vars:
+    brew_prefix: "{{ '/opt/homebrew' if ansible_facts['architecture'] == 'arm64' else '/usr/local' }}"
+
+  # Make freshly installed tools visible to later tasks in the same run.
+  environment:
+    PATH: >-
+      {{ gopath }}/bin:{{ home_dir }}/.local/bin:{{ home_dir }}/.pyenv/shims:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+    GOPATH: "{{ gopath }}"
+    HOMEBREW_NO_ENV_HINTS: "1"
+
+  pre_tasks:
+    - name: Make sure this is macOS
+      ansible.builtin.assert:
+        that: ansible_facts['os_family'] == 'Darwin'
+        fail_msg: "This playbook only supports macOS."
+      tags: [always]
+
+    - name: Create common folders
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ home_dir }}/code"
+        - "{{ gopath }}/bin"
+        - "{{ home_dir }}/.local/bin"
+      tags: [always]
+
+  tasks:
+    - name: Homebrew packages and apps
+      ansible.builtin.import_tasks: tasks/homebrew.yml
+      tags: [homebrew]
+
+    - name: Git and SSH
+      ansible.builtin.import_tasks: tasks/git.yml
+      tags: [git]
+
+    - name: Zsh and Oh My Zsh
+      ansible.builtin.import_tasks: tasks/shell.yml
+      tags: [shell]
+
+    - name: iTerm2 profile
+      ansible.builtin.import_tasks: tasks/iterm.yml
+      tags: [iterm]
+
+    - name: Python
+      ansible.builtin.import_tasks: tasks/python.yml
+      tags: [python]
+
+    - name: Node via nvm
+      ansible.builtin.import_tasks: tasks/node.yml
+      tags: [node]
+
+    - name: Go tools
+      ansible.builtin.import_tasks: tasks/go.yml
+      tags: [go]
+
+    - name: macOS preferences
+      ansible.builtin.import_tasks: tasks/macos.yml
+      when: configure_macos | bool
+      tags: [macos]
+
+  handlers:
+    - name: Restart Finder
+      ansible.builtin.command: killall Finder
+      changed_when: true
+      failed_when: false
+
+    - name: Restart SystemUIServer
+      ansible.builtin.command: killall SystemUIServer
+      changed_when: true
+      failed_when: false

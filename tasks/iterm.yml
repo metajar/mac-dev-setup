@@ -1,0 +1,34 @@
+---
+# iTerm2 picks up "Dynamic Profiles" from this folder automatically.
+- name: Create iTerm2 dynamic profiles folder
+  ansible.builtin.file:
+    path: "{{ home_dir }}/Library/Application Support/iTerm2/DynamicProfiles"
+    state: directory
+    mode: "0755"
+
+- name: Add a "Dev" iTerm2 profile (Nerd Font, unlimited scrollback, Option as Meta)
+  ansible.builtin.copy:
+    dest: "{{ home_dir }}/Library/Application Support/iTerm2/DynamicProfiles/mac-dev-setup.json"
+    mode: "0644"
+    content: |
+      {
+        "Profiles": [
+          {
+            "Name": "Dev",
+            "Guid": "mac-dev-setup-dev-profile",
+            "Normal Font": "JetBrainsMonoNFM-Regular 14",
+            "Unlimited Scrollback": true,
+            "Option Key Sends": 2,
+            "Right Option Key Sends": 2,
+            "Silence Bell": true,
+            "Custom Directory": "Recycle"
+          }
+        ]
+      }
+
+- name: Make "Dev" the default iTerm2 profile
+  community.general.osx_defaults:
+    domain: com.googlecode.iterm2
+    key: Default Bookmark Guid
+    type: string
+    value: mac-dev-setup-dev-profile

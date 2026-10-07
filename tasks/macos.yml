@@ -1,0 +1,52 @@
+---
+- name: Create ~/Screenshots
+  ansible.builtin.file:
+    path: "{{ home_dir }}/Screenshots"
+    state: directory
+    mode: "0755"
+
+- name: Developer-friendly keyboard and text settings
+  community.general.osx_defaults:
+    domain: NSGlobalDomain
+    key: "{{ item.key }}"
+    type: "{{ item.type }}"
+    value: "{{ item.value }}"
+  loop:
+    - { key: KeyRepeat, type: int, value: 2 }                           # fast key repeat
+    - { key: InitialKeyRepeat, type: int, value: 15 }
+    - { key: ApplePressAndHoldEnabled, type: bool, value: false }       # hold a key to repeat it
+    - { key: NSAutomaticQuoteSubstitutionEnabled, type: bool, value: false }  # no smart quotes
+    - { key: NSAutomaticDashSubstitutionEnabled, type: bool, value: false }   # no smart dashes
+    - { key: AppleShowAllExtensions, type: bool, value: true }
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Finder settings
+  community.general.osx_defaults:
+    domain: com.apple.finder
+    key: "{{ item.key }}"
+    type: "{{ item.type }}"
+    value: "{{ item.value }}"
+  loop:
+    - { key: AppleShowAllFiles, type: bool, value: true }     # show dotfiles
+    - { key: ShowPathbar, type: bool, value: true }
+    - { key: ShowStatusBar, type: bool, value: true }
+    - { key: FXPreferredViewStyle, type: string, value: Nlsv } # list view
+  loop_control:
+    label: "{{ item.key }}"
+  notify: Restart Finder
+
+- name: Don't write .DS_Store files on network drives
+  community.general.osx_defaults:
+    domain: com.apple.desktopservices
+    key: DSDontWriteNetworkStores
+    type: bool
+    value: true
+
+- name: Save screenshots to ~/Screenshots
+  community.general.osx_defaults:
+    domain: com.apple.screencapture
+    key: location
+    type: string
+    value: "{{ home_dir }}/Screenshots"
+  notify: Restart SystemUIServer

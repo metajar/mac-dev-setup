@@ -1,0 +1,26 @@
+---
+- name: Find the newest matching Python release pyenv knows about
+  ansible.builtin.command: pyenv latest --known {{ python_version }}
+  register: py_latest
+  changed_when: false
+
+- name: Install that Python with pyenv (compiles from source, a few minutes)
+  ansible.builtin.command: pyenv install --skip-existing {{ py_latest.stdout }}
+  register: py_install
+  changed_when: "'Installed Python' in (py_install.stdout + py_install.stderr)"
+
+- name: Read the current global Python
+  ansible.builtin.command: pyenv global
+  register: py_global
+  changed_when: false
+
+- name: Make it the global Python
+  ansible.builtin.command: pyenv global {{ py_latest.stdout }}
+  when: py_global.stdout | trim != py_latest.stdout | trim
+  changed_when: true
+
+- name: Install Python CLI tools with uv
+  ansible.builtin.command: uv tool install {{ item }}
+  args:
+    creates: "{{ home_dir }}/.local/bin/{{ item }}"
+  loop: "{{ uv_tools }}"
