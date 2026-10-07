@@ -45,3 +45,4 @@ and whether to apply macOS preferences. Put your own shell tweaks in `~/.zshrc.l
 3. `colima start` — starts the Docker runtime (`docker run hello-world` to test).
 4. `brew services start postgresql@17` / `brew services start redis` when you need them.
 5. `mkcert -install` — once, for trusted local HTTPS certs (asks for your password).
+# mac-dev-setup
