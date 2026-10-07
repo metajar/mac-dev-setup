@@ -38,13 +38,28 @@
     state: directory
     mode: "0700"
 
+- name: Look for existing SSH keys
+  ansible.builtin.find:
+    paths: "{{ home_dir }}/.ssh"
+    patterns: "*.pub"
+  register: existing_ssh_keys
+
+- name: Look for an existing ~/.ssh/config
+  ansible.builtin.stat:
+    path: "{{ home_dir }}/.ssh/config"
+  register: existing_ssh_config
+
+# Leave SSH alone on machines that already have keys or a config: a new key
+# plus an IdentityFile pin would stop ssh from offering the keys already in use.
 - name: Generate an SSH key (ed25519)
   ansible.builtin.command: >-
     ssh-keygen -t ed25519 -N "" -f {{ home_dir }}/.ssh/id_ed25519
     -C "{{ git_user_email if git_user_email | length > 0 else ansible_facts['user_id'] ~ '@' ~ ansible_facts['hostname'] }}"
   args:
     creates: "{{ home_dir }}/.ssh/id_ed25519"
-  when: generate_ssh_key | bool
+  when:
+    - generate_ssh_key | bool
+    - existing_ssh_keys.matched == 0
 
 - name: Use the macOS keychain for SSH keys
   ansible.builtin.blockinfile:
@@ -58,3 +73,6 @@
         AddKeysToAgent yes
         UseKeychain yes
         IdentityFile ~/.ssh/id_ed25519
+  when:
+    - existing_ssh_keys.matched == 0
+    - not existing_ssh_config.stat.exists
