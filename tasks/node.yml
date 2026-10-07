@@ -1,5 +1,12 @@
 ---
+- name: Look for an existing nvm install
+  ansible.builtin.stat:
+    path: "{{ nvm_dir }}/nvm.sh"
+  register: existing_nvm
+
 # nvm's own recommended manual install: clone, then check out the latest release tag.
+# Skipped when nvm is already there (e.g. Homebrew's nvm, which symlinks nvm.sh
+# into NVM_DIR), since cloning into a non-empty folder fails.
 - name: Clone nvm
   ansible.builtin.git:
     repo: https://github.com/nvm-sh/nvm.git
@@ -9,6 +16,7 @@
   environment:
     GIT_CONFIG_GLOBAL: /dev/null
   register: nvm_clone
+  when: not existing_nvm.stat.exists
 
 - name: Check out the latest nvm release
   ansible.builtin.shell: >-
